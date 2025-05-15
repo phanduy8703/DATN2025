@@ -1,0 +1,34 @@
+{
+  "menu": {
+    "home": "Home",
+    "collection": "Collection",
+    "about": "About Us",
+    "man": "Documents",
+    "woman": "Technology",
+    "categories": "Categories"
+  },
+  "fashion": {
+    "modern_style": "Modern Technology",
+    "title": "Resources for the Digital",
+    "season": "Era",
+    "description": "Explore the latest tech documents and elevate your skills with HaUI SHOP.",
+
+    "trend_title": "New Tech Trends",
+    "trend_heading": "Resources for Innovators",
+    "style": "Breakthrough",
+    "trend_description": "Enhance your knowledge with exclusive resources from HaUI SHOP. We bring you the latest technology documents to keep you ahead in your field.",
+
+    "design_title": "Quality Content",
+    "design_heading": "The perfect blend of",
+    "design_highlight": "theory and practice",
+    "design_description": "Not just knowledge, HaUI SHOP resources come with practical examples, source code, and exercises. High-quality materials, constantly updated, and verified by experts.",
+
+    "shop_now": "Download Now",
+    "discover_now": "Discover Now",
+    "learn_more": "Learn More",
+
+    "bestseller": "Popular",
+    "limited": "Limited Edition",
+    "latest": "Latest"
+  }
+}

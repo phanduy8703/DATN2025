@@ -1,0 +1,34 @@
+{
+  "menu": {
+    "home": "Trang Chủ",
+    "collection": "Bộ Sưu tập",
+    "about": "Giới Thiệu",
+    "man": "Tài liệu",
+    "woman": "Đồ công nghệ",
+    "categories": "Danh mục"
+  },
+  "fashion": {
+    "modern_style": "Công nghệ hiện đại",
+    "title": "Tài liệu cho kỷ nguyên",
+    "season": "số",
+    "description": "Khám phá kho tàng tài liệu công nghệ mới nhất và nâng cao kỹ năng với HaUI SHOP.",
+
+    "trend_title": "Xu hướng công nghệ mới",
+    "trend_heading": "Tài liệu cho người tiên phong",
+    "style": "đổi mới",
+    "trend_description": "Cập nhật kiến thức với những tài liệu độc quyền tại HaUI SHOP. Chúng tôi mang đến những xu hướng công nghệ mới nhất giúp bạn luôn dẫn đầu trong lĩnh vực của mình.",
+
+    "design_title": "Nội dung chất lượng",
+    "design_heading": "Sự kết hợp giữa",
+    "design_highlight": "lý thuyết và thực hành",
+    "design_description": "Không chỉ cung cấp kiến thức, tài liệu HaUI SHOP còn đi kèm với các ví dụ thực tế, mã nguồn và bài tập. Tài liệu chất lượng cao, cập nhật liên tục và đã được kiểm chứng bởi chuyên gia.",
+
+    "shop_now": "Tải ngay",
+    "discover_now": "Khám phá ngay",
+    "learn_more": "Tìm hiểu thêm",
+
+    "bestseller": "Phổ biến",
+    "limited": "Giới hạn",
+    "latest": "mới nhất"
+  }
+}
