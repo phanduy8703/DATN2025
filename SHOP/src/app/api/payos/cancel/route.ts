@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
 
     // Chuyển hướng về trang hủy đơn hàng
     return NextResponse.redirect(
-      new URL(`${process.env.NEXT_PUBLIC_NGROK_URL}/(client)/order/cancel?orderCode=${orderId}`),
+      new URL(`${process.env.NEXT_PUBLIC_NGROK_URL}/order/cancel?orderCode=${orderId}`),
       302
     );
   } catch (error) {
@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
     
     // Chuyển hướng tới trang lỗi
     return NextResponse.redirect(
-      new URL(`${process.env.NEXT_PUBLIC_NGROK_URL}/(client)/order/cancel?orderCode=${orderId}&error=true`),
+      new URL(`${process.env.NEXT_PUBLIC_NGROK_URL}/order/cancel?orderCode=${orderId}&error=true`),
       302
     );
   }
