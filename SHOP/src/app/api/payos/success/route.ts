@@ -90,13 +90,13 @@ export async function GET(req: NextRequest) {
 
       // Chuyển hướng tới trang đơn hàng
       return NextResponse.redirect(
-        new URL(`${process.env.NEXT_PUBLIC_NGROK_URL}/(client)/order/success?orderCode=${orderId}`),
+        new URL(`${process.env.NEXT_PUBLIC_NGROK_URL}/order/success?orderCode=${orderId}`),
         302
       );
     } else {
       // Thanh toán không thành công, chuyển hướng tới trang thất bại
       return NextResponse.redirect(
-        new URL(`${process.env.NEXT_PUBLIC_NGROK_URL}/(client)/order/cancel?orderCode=${orderId}`),
+        new URL(`${process.env.NEXT_PUBLIC_NGROK_URL}/order/cancel?orderCode=${orderId}`),
         302
       );
     }
@@ -105,7 +105,7 @@ export async function GET(req: NextRequest) {
     
     // Chuyển hướng tới trang lỗi
     return NextResponse.redirect(
-      new URL(`${process.env.NEXT_PUBLIC_NGROK_URL}/(client)/order/cancel`),
+      new URL(`${process.env.NEXT_PUBLIC_NGROK_URL}/order/cancel`),
       302
     );
   }
