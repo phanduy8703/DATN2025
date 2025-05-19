@@ -311,7 +311,7 @@ export async function POST(req: NextRequest) {
         
         // Tạo link thanh toán qua PayOS
         
-        const apiBaseUrl = process.env.NEXT_PUBLIC_NGROK_URL;
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
         const cancelUrl = `${apiBaseUrl}/api/payos/cancel?orderCode=${order.order_id}`;
         const returnUrl = `${apiBaseUrl}/api/payos/success?orderCode=${order.order_id}`;
         
