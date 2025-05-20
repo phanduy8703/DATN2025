@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
         username,
         password: hashPassword,
         token: accessToken,
-        roleId: 1,
+        roleId: 2,
       },
     });
     return NextResponse.json(
