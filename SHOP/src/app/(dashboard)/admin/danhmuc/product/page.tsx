@@ -86,7 +86,7 @@ const PageProduct = () => {
     setLoading(false);
     setCurrentPage(data.pagination.currentPage);
     setTotalPages(data.pagination.totalPages);
-    setProduct(data.magamentProducts);
+    setProduct(data.product);
   };
 
   useEffect(() => {
