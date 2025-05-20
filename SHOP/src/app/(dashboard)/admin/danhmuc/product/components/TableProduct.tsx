@@ -114,31 +114,37 @@ const TableProduct = (props: ITable) => {
                 {ForMatPrice(product.price)}
               </TableCell>
               <TableCell className="px-4 py-2 text-center text-black">
-                {product.stock_quantity} số lượng
+                {product.stock_quantity || 'N/A'} {product.stock_quantity ? 'số lượng' : ''}
               </TableCell>
               <TableCell className="px-4 py-2 hidden md:block text-black">
                 <div className="flex gap-1 mt-6">
-                  {product.ProductSizes.map((size, index) => (
+                  {product.ProductSizes?.map ? product.ProductSizes.map((size, index) => (
                     <p
                       key={index}
                       className="border border-gray-700 py-1 px-2 hover:bg-slate-200 text-black"
-                      title={`số lượng còn ${size.stock_quantity} `}
+                      title={`số lượng còn ${size.stock_quantity || 0} `}
                     >
-                      {size.Size?.name_size}
+                      {size.Size?.name_size || 'N/A'}
                     </p>
-                  ))}
+                  )) : <p className="text-gray-400">Không có kích thước</p>}
                 </div>
               </TableCell>
               <TableCell className="px-4 py-2 relative text-black">
                 <div className="flex items-center justify-center">
-                  <Image
-                    width={200}
-                    height={200}
-                    src={product.Images[0]?.image_url}
-                    alt={`Hình ảnh sản phẩm ${index}`}
-                    className="w-20 h-20 object-cover rounded-md shadow-sm"
-                  />
-                  {product.Images.length > 1 && (
+                  {product.Images && product.Images[0]?.image_url ? (
+                    <Image
+                      width={200}
+                      height={200}
+                      src={product.Images[0]?.image_url}
+                      alt={`Hình ảnh sản phẩm ${index}`}
+                      className="w-20 h-20 object-cover rounded-md shadow-sm"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 flex items-center justify-center bg-gray-200 rounded-md">
+                      Không có ảnh
+                    </div>
+                  )}
+                  {product.Images && product.Images.length > 1 && (
                     <button
                       className="ml-2 text-black hover:text-gray-600 focus:outline-none"
                       onClick={() => toggleShowAllImages(product.product_id)}
@@ -150,7 +156,7 @@ const TableProduct = (props: ITable) => {
                 {showAllImages === product.product_id && (
                   <div className="absolute z-10 bg-white mt-2 cursor-pointer w-full">
                     <div className="flex space-x-2 justify-center">
-                      {product.Images.map((image, imageIndex) => (
+                      {product.Images?.map((image, imageIndex) => (
                         <Image
                           width={200}
                           height={200}
