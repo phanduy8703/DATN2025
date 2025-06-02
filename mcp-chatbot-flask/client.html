@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini MCP Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .header {
+            background-color: #4285f4;
+            color: white;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .chat-container {
+            display: flex;
+            flex-grow: 1;
+            gap: 20px;
+        }
+        .sidebar {
+            width: 300px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .chat-window {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 280px);
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+        .user-message {
+            background-color: #e3f2fd;
+            margin-left: auto;
+            text-align: right;
+        }
+        .bot-message {
+            background-color: #f1f1f1;
+            margin-right: auto;
+        }
+        .tool-result {
+            background-color: #fff8e1;
+            margin-right: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .input-area {
+            display: flex;
+            padding: 15px;
+            gap: 10px;
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2b68c9;
+        }
+        .sidebar h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        .session-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .session-list {
+            margin-top: 20px;
+        }
+        .session-item {
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .session-item:hover {
+            background-color: #f5f5f5;
+        }
+        .session-item.active {
+            border-color: #4285f4;
+            background-color: #e3f2fd;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: #4285f4;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .hidden {
+            display: none;
+        }
+        code {
+            font-family: monospace;
+            background-color: #f1f1f1;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Gemini MCP Chatbot</h1>
+            <p>AI-powered chatbot with database integration</p>
+        </div>
+        
+        <div class="chat-container">
+            <div class="sidebar">
+                <h3>Sessions</h3>
+                <div class="session-buttons">
+                    <button id="newSession">New Session</button>
+                    <button id="refreshSessions">Refresh</button>
+                </div>
+                
+                <div id="newSessionForm" class="hidden">
+                    <h4>New Session Options</h4>
+                    <div style="margin-bottom: 10px;">
+                        <label for="customerIdInput">Customer ID (optional):</label>
+                        <input type="text" id="customerIdInput" placeholder="e.g. 17">
+                    </div>
+                    <button id="createSession">Create Session</button>
+                </div>
+                
+                <div class="session-list" id="sessionList">
+                    <p>No active sessions. Create a new one to start chatting.</p>
+                </div>
+            </div>
+            
+            <div class="chat-window">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot-message">
+                        Welcome to Gemini MCP Chatbot! Please create or select a session to start chatting.
+                    </div>
+                </div>
+                
+                <div class="input-area">
+                    <input type="text" id="messageInput" placeholder="Type your message here..." disabled>
+                    <button id="sendButton" disabled>Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:5004/api';
+        let currentSessionId = null;
+        
+        // DOM Elements
+        const newSessionBtn = document.getElementById('newSession');
+        const newSessionForm = document.getElementById('newSessionForm');
+        const createSessionBtn = document.getElementById('createSession');
+        const customerIdInput = document.getElementById('customerIdInput');
+        const refreshSessionsBtn = document.getElementById('refreshSessions');
+        const sessionListElement = document.getElementById('sessionList');
+        const chatMessagesElement = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        
+        // Event Listeners
+        newSessionBtn.addEventListener('click', toggleNewSessionForm);
+        createSessionBtn.addEventListener('click', createNewSession);
+        refreshSessionsBtn.addEventListener('click', fetchSessions);
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        sendButton.addEventListener('click', sendMessage);
+        
+        // On page load
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchSessions();
+        });
+        
+        // Functions
+        function toggleNewSessionForm() {
+            newSessionForm.classList.toggle('hidden');
+        }
+        
+        async function createNewSession() {
+            const customerId = customerIdInput.value.trim();
+            const data = {};
+            
+            if (customerId) {
+                data.customer_id = customerId;
+            }
+            
+            showLoading(createSessionBtn);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/sessions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Clear the form
+                    customerIdInput.value = '';
+                    newSessionForm.classList.add('hidden');
+                    
+                    // Select the new session
+                    selectSession(result.session_id);
+                    
+                    // Refresh the session list
+                    fetchSessions();
+                    
+                    // Add welcome message
+                    addBotMessage("Session created successfully. The chatbot is ready with product information preloaded. You can now ask questions about products or customer information.");
+                } else {
+                    alert(`Error: ${result.error || 'Could not create session'}`);
+                }
+            } catch (error) {
+                console.error('Error creating session:', error);
+                alert('Error creating session. Please check if the API server is running.');
+            } finally {
+                hideLoading(createSessionBtn);
+            }
+        }
+        
+        async function fetchSessions() {
+            showLoading(refreshSessionsBtn);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/sessions`);
+                const result = await response.json();
+                
+                if (response.ok) {
+                    renderSessionList(result.sessions);
+                } else {
+                    alert(`Error: ${result.error || 'Could not fetch sessions'}`);
+                }
+            } catch (error) {
+                console.error('Error fetching sessions:', error);
+                alert('Error fetching sessions. Please check if the API server is running.');
+            } finally {
+                hideLoading(refreshSessionsBtn);
+            }
+        }
+        
+        function renderSessionList(sessions) {
+            sessionListElement.innerHTML = '';
+            
+            if (!sessions || Object.keys(sessions).length === 0) {
+                sessionListElement.innerHTML = '<p>No active sessions. Create a new one to start chatting.</p>';
+                return;
+            }
+            
+            Object.entries(sessions).forEach(([sessionId, sessionInfo]) => {
+                const sessionItem = document.createElement('div');
+                sessionItem.className = `session-item ${sessionId === currentSessionId ? 'active' : ''}`;
+                sessionItem.setAttribute('data-session-id', sessionId);
+                
+                // Format session information
+                const lastActivity = new Date(sessionInfo.last_activity).toLocaleString();
+                const preloadedData = [];
+                
+                if (sessionInfo.preloaded_data) {
+                    if (sessionInfo.preloaded_data.products) preloadedData.push('Products');
+                    if (sessionInfo.preloaded_data.customer) preloadedData.push('Customer');
+                }
+                
+                sessionItem.innerHTML = `
+                    <strong>Session:</strong> ${sessionId.substring(0, 8)}...
+                    <br>
+                    <small>Messages: ${sessionInfo.message_count || 0}</small>
+                    <br>
+                    <small>Last activity: ${lastActivity}</small>
+                    ${preloadedData.length > 0 ? `<br><small>Preloaded: ${preloadedData.join(', ')}</small>` : ''}
+                `;
+                
+                sessionItem.addEventListener('click', () => selectSession(sessionId));
+                
+                sessionListElement.appendChild(sessionItem);
+            });
+        }
+        
+        async function selectSession(sessionId) {
+            if (sessionId === currentSessionId) return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}`);
+                const result = await response.json();
+                
+                if (response.ok) {
+                    currentSessionId = sessionId;
+                    
+                    // Update UI to show this session is selected
+                    document.querySelectorAll('.session-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    
+                    const selectedItem = document.querySelector(`.session-item[data-session-id="${sessionId}"]`);
+                    if (selectedItem) selectedItem.classList.add('active');
+                    
+                    // Enable message input
+                    messageInput.disabled = false;
+                    sendButton.disabled = false;
+                    
+                    // Clear and populate chat messages
+                    chatMessagesElement.innerHTML = '';
+                    
+                    // Add a welcome message
+                    addBotMessage(`Session activated. You can now chat with the AI assistant.`);
+                    
+                    // Load previous messages if any
+                    renderPreviousMessages(result.messages);
+                } else {
+                    alert(`Error: ${result.error || 'Could not load session'}`);
+                }
+            } catch (error) {
+                console.error('Error selecting session:', error);
+                alert('Error selecting session. Please check if the API server is running.');
+            }
+        }
+        
+        function renderPreviousMessages(messages) {
+            if (!messages || messages.length === 0) return;
+            
+            messages.forEach(msg => {
+                if (msg.role === 'user') {
+                    addUserMessage(msg.content);
+                } else if (msg.role === 'assistant') {
+                    addBotMessage(msg.content);
+                }
+            });
+        }
+        
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            
+            if (!message || !currentSessionId) return;
+            
+            // Clear input field
+            messageInput.value = '';
+            
+            // Add user message to UI
+            addUserMessage(message);
+            
+            // Disable input while processing
+            messageInput.disabled = true;
+            sendButton.disabled = true;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/sessions/${currentSessionId}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    processResponses(result.responses);
+                } else {
+                    addBotMessage(`Error: ${result.error || 'Something went wrong'}`);
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                addBotMessage('Error communicating with the server. Please check if the API is running.');
+            } finally {
+                // Re-enable input
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+                messageInput.focus();
+            }
+        }
+        
+        function processResponses(responses) {
+            if (!responses || responses.length === 0) {
+                addBotMessage('No response received from the server.');
+                return;
+            }
+            
+            responses.forEach(response => {
+                if (response.type === 'ai_message') {
+                    addBotMessage(response.content);
+                } else if (response.type === 'tool_result') {
+                    addToolResult(response.tool_name, response.tool_args, response.result);
+                }
+            });
+        }
+        
+        function addUserMessage(text) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message user-message';
+            messageElement.textContent = text;
+            
+            chatMessagesElement.appendChild(messageElement);
+            scrollToBottom();
+        }
+        
+        function addBotMessage(text) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message bot-message';
+            messageElement.innerHTML = formatMessage(text);
+            
+            chatMessagesElement.appendChild(messageElement);
+            scrollToBottom();
+        }
+        
+        function addToolResult(toolName, args, result) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message tool-result';
+            
+            let formattedResult;
+            if (typeof result === 'object') {
+                formattedResult = JSON.stringify(result, null, 2);
+            } else {
+                formattedResult = result;
+            }
+            
+            messageElement.innerHTML = `<strong>Tool Execution:</strong> ${toolName}\n<strong>Arguments:</strong> ${JSON.stringify(args)}\n<strong>Result:</strong>\n${formattedResult}`;
+            
+            chatMessagesElement.appendChild(messageElement);
+            scrollToBottom();
+        }
+        
+        function formatMessage(text) {
+            // Convert markdown-like formatting
+            // Code blocks
+            text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+            
+            // Line breaks
+            text = text.replace(/\n/g, '<br>');
+            
+            return text;
+        }
+        
+        function scrollToBottom() {
+            chatMessagesElement.scrollTop = chatMessagesElement.scrollHeight;
+        }
+        
+        function showLoading(button) {
+            const originalText = button.textContent;
+            button.setAttribute('data-original-text', originalText);
+            button.innerHTML = '<span class="loading"></span> Loading...';
+            button.disabled = true;
+        }
+        
+        function hideLoading(button) {
+            const originalText = button.getAttribute('data-original-text');
+            button.textContent = originalText;
+            button.disabled = false;
+        }
+    </script>
+</body>
+</html>
