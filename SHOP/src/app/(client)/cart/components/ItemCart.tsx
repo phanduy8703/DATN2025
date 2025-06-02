@@ -99,7 +99,9 @@ const ItemCart = ({ items }: CartItemListProps) => {
               <Image
                 width={100}
                 height={100}
-                src={item.product.Images[0].image_url}
+                src={item.product?.Images && item.product.Images.length > 0 
+                  ? item.product.Images[0].image_url 
+                  : '/placeholder-image.jpg'}
                 alt="Product image"
                 className="w-14 h-14 sm:w-20 sm:h-20 object-contain rounded-md"
               />
